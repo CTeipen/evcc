@@ -92,13 +92,14 @@
 								<p v-if="!selectedTargetTimeValid" class="text-danger mb-0">
 									{{ $t("main.targetCharge.targetIsInThePast") }}
 								</p>
-								<TargetChargePlanMinimal v-else-if="plan" v-bind="plan" />
+								<TargetChargePlanMinimal v-else-if="plan.duration" v-bind="plan" />
 							</div>
 							<div class="modal-footer d-flex justify-content-between">
 								<button
 									type="button"
 									class="btn btn-outline-secondary"
 									data-bs-dismiss="modal"
+									:disabled="!targetTime"
 									@click="removeTargetTime"
 								>
 									{{ $t("main.targetCharge.remove") }}
@@ -177,6 +178,7 @@ export default {
 		},
 		targetTime() {
 			this.initInputFields();
+			this.updatePlan();
 		},
 		selectedTargetTime() {
 			this.updatePlan();
@@ -187,9 +189,6 @@ export default {
 		targetEnergy() {
 			this.updatePlan();
 		},
-	},
-	mounted: function () {
-		this.initInputFields();
 	},
 	methods: {
 		updatePlan: async function () {
@@ -277,6 +276,7 @@ export default {
 		},
 		openModal() {
 			const modal = Modal.getOrCreateInstance(document.getElementById(this.modalId));
+			this.initInputFields();
 			modal.show();
 		},
 	},
