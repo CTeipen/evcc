@@ -92,28 +92,26 @@ func (t *Planner) Plan(requiredDuration time.Duration, targetTime time.Time) (ap
 	// calculate start time
 	latestStart := targetTime.Add(-requiredDuration)
 	afterStart := t.clock.Now().After(latestStart) || t.clock.Now().Equal(latestStart)
-	beforeTarget := t.clock.Now().Before(targetTime)
 
-	var plan api.Rates
-	if afterStart && beforeTarget {
-		plan = api.Rates{
-			api.Rate{
-				Start: latestStart,
-				End:   targetTime,
-			},
-		}
+	// simplePlan only considers time, but not cost
+	// TODO add costs to simple plan if tariff and rates are available
+	simplePlan := api.Rates{
+		api.Rate{
+			Start: latestStart,
+			End:   targetTime,
+		},
 	}
 
 	// target charging without tariff or late start
 	if t.tariff == nil || afterStart {
-		return plan, nil
+		return simplePlan, nil
 	}
 
 	rates, err := t.tariff.Rates()
 
 	// treat like normal target charging if we don't have rates
 	if len(rates) == 0 || err != nil {
-		return plan, err
+		return simplePlan, err
 	}
 
 	// rates are by default sorted by date, oldest to newest
