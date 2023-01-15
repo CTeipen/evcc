@@ -485,6 +485,7 @@ func (lp *Loadpoint) evVehicleDisconnectHandler() {
 	lp.socUpdated = time.Time{}
 
 	// reset plan once charge goal is met
+	lp.setTargetTime(time.Time{})
 	lp.setPlanActive(false)
 }
 
