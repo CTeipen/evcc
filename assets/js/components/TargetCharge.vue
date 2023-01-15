@@ -139,8 +139,8 @@ export default {
 	mixins: [formatter],
 	props: {
 		id: [String, Number],
+		planActive: Boolean,
 		targetTime: String,
-		targetTimeActive: Boolean,
 		targetSoc: Number,
 		targetEnergy: Number,
 		socBasedCharging: Boolean,

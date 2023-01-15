@@ -15,7 +15,7 @@ func (lp *Loadpoint) setPlanActive(active bool) {
 		lp.planSlotEnd = time.Time{}
 	}
 	lp.planActive = active
-	lp.publish("planActive", lp.planActive)
+	lp.publish(planActive, lp.planActive)
 }
 
 // planRequiredDuration is the estimated total charging duration
@@ -83,7 +83,6 @@ func (lp *Loadpoint) GetPlan(targetTime time.Time, maxPower float64) (time.Durat
 func (lp *Loadpoint) plannerActive() (active bool) {
 	defer func() {
 		lp.setPlanActive(active)
-		lp.publish(targetTimeActive, active)
 	}()
 
 	maxPower := lp.GetMaxPower()
@@ -100,7 +99,7 @@ func (lp *Loadpoint) plannerActive() (active bool) {
 	}
 
 	planStart := planner.Start(plan)
-	lp.publish(targetTimeProjectedStart, planStart)
+	lp.publish(planProjectedStart, planStart)
 
 	lp.log.DEBUG.Printf("planned %v until %v at %.0fW: total plan duration: %v, avg cost: %.3f",
 		requiredDuration.Round(time.Second), lp.targetTime.Round(time.Second).Local(), maxPower,
@@ -131,14 +130,14 @@ func (lp *Loadpoint) plannerActive() (active bool) {
 			// if the plan did not (entirely) work, we may still be charging beyond plan end- in that case, continue charging
 			// TODO check when schedule is implemented
 			lp.log.DEBUG.Println("continuing after target time")
-			active = true
+			return true
 		case lp.clock.Now().Before(lp.planSlotEnd) && !lp.planSlotEnd.IsZero():
 			// don't stop an already running slot if goal was not met
 			lp.log.DEBUG.Println("continuing until end of slot")
-			active = true
+			return true
 		case requiredDuration < 30*time.Minute:
 			lp.log.DEBUG.Printf("continuing for remaining %v", requiredDuration.Round(time.Second))
-			active = true
+			return true
 		case lp.clock.Until(planStart) < smallSlotDuration:
 			lp.log.DEBUG.Printf("plan will re-start shortly, continuing for remaining %v", lp.clock.Until(planStart).Round(time.Second))
 			return true
